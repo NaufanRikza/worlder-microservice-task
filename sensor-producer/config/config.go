@@ -3,8 +3,8 @@ package config
 import "github.com/caarlos0/env/v11"
 
 type Config struct {
-	DatabaseConfig
 	MqttConfig
+	AppConfig
 }
 
 func NewConfig() (Config, error) {

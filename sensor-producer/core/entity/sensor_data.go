@@ -1,4 +1,4 @@
-package dto
+package entity
 
 type SensorData struct {
 	SensorValue float64 `json:"sensor_value"`

@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"sensor-producer/cmd"
 	"sensor-producer/config"
+	"sensor-producer/core/infrastructure"
+	"sensor-producer/core/usecase"
 	"syscall"
 )
 
@@ -26,8 +28,18 @@ func main() {
 		cancel()
 	}()
 
-	go cmd.StartHTTPServer()
-	go cmd.StartMQTTClient(config.MqttConfig, freqChannel, ctx)
+	//start mqtt client
+	mqttClient := cmd.StartMQTTClient(config.MqttConfig)
+	publisher := infrastructure.NewPublisher(mqttClient)
+	sensorUsecase := usecase.NewSensorUsecase(
+		publisher,
+		config.MqttConfig.Topic,
+		config.AppConfig.DataGenerationFrequency,
+		freqChannel,
+	)
+
+	go sensorUsecase.Start(ctx)
+	// go cmd.StartHTTPServer()
 
 	<-ctx.Done()
 	fmt.Println("Cleanup complete.")
