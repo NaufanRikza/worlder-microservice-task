@@ -7,9 +7,13 @@ import (
 	"os/signal"
 	"sensor-producer/cmd"
 	"sensor-producer/config"
+	"sensor-producer/core/handler/http"
 	"sensor-producer/core/infrastructure"
+	"sensor-producer/core/router"
 	"sensor-producer/core/usecase"
 	"syscall"
+
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -39,7 +43,15 @@ func main() {
 	)
 
 	go sensorUsecase.Start(ctx)
-	// go cmd.StartHTTPServer()
+
+	e := echo.New()
+	sensorHandler := http.NewSensorHandler(sensorUsecase)
+	router := router.NewRouter(sensorHandler)
+	group := e.Group("/api/v1")
+	router.RegisterRoutes(group)
+	
+	// Start HTTP server
+	cmd.StartHTTPServer(ctx, e)
 
 	<-ctx.Done()
 	fmt.Println("Cleanup complete.")

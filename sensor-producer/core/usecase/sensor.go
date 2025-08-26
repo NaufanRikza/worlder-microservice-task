@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand/v2"
 	"sensor-producer/core/entity"
@@ -19,6 +20,7 @@ type sensorUsecase struct {
 
 type SensorUsecase interface {
 	Start(ctx context.Context)
+	ChangeFrequency(freq uint) error
 }
 
 func NewSensorUsecase(publisher infrastructure.Publisher, topic string, initialFreq uint, freqChannel chan uint) SensorUsecase {
@@ -66,5 +68,14 @@ func (s *sensorUsecase) Start(ctx context.Context) {
 			s.Publisher.Disconnect()
 			return
 		}
+	}
+}
+
+func (s *sensorUsecase) ChangeFrequency(freq uint) error {
+	select {
+	case s.FreqChannel <- freq:
+		return nil
+	default:
+		return fmt.Errorf("failed to change frequency")
 	}
 }

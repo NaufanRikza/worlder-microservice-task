@@ -1,15 +1,19 @@
 package cmd
 
-func StartHTTPServer() {
-	// connect to database
-	// dbConfig, err := config.GetDatabaseConfig()
-	// if err != nil {
-	// 	panic("Failed to load database configuration: " + err.Error())
-	// }
+import (
+	"context"
 
-	// db, err := NewDatabaseInstance(dbConfig)
-	// if err != nil {
-	// 	// handle error
-	// 	panic("Failed to connect to database: " + err.Error())
-	// }
+	"github.com/labstack/echo/v4"
+)
+
+func StartHTTPServer(ctx context.Context, e *echo.Echo) error {
+	// Start server
+	go func() {
+		if err := e.Start(":8080"); err != nil {
+			panic("Failed to start HTTP server: " + err.Error())
+		}
+	}()
+
+	<-ctx.Done()
+	return e.Shutdown(ctx)
 }
