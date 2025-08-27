@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"sensor-consumer/core/entity"
 
 	"gorm.io/gorm"
@@ -11,7 +12,8 @@ type userRepository struct {
 }
 
 type UserRepository interface {
-	GetByUsername(username string) (entity.User, error)
+	GetByUsername(ctx context.Context, username string) (entity.User, error)
+	GetUserIDByUsername(ctx context.Context, username string) (uint64, error)
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -20,8 +22,14 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	}
 }
 
-func (r *userRepository) GetByUsername(username string) (entity.User, error) {
+func (r *userRepository) GetByUsername(ctx context.Context, username string) (entity.User, error) {
 	var user entity.User
-	err := r.DB.Model(&user).Where("username = ?", username).First(&user).Error
+	err := r.DB.WithContext(ctx).Model(&user).Where("username = ?", username).First(&user).Error
 	return user, err
+}
+
+func (r *userRepository) GetUserIDByUsername(ctx context.Context, username string) (uint64, error) {
+	var user entity.User
+	err := r.DB.WithContext(ctx).Model(&user).Where("username = ?", username).First(&user).Error
+	return user.ID, err
 }

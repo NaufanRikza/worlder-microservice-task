@@ -2,7 +2,7 @@ package http
 
 import (
 	"net/http"
-	"sensor-consumer/core/repository"
+	"sensor-consumer/core/dto"
 	"sensor-consumer/core/usecase"
 	"strconv"
 
@@ -26,7 +26,7 @@ func NewSensorHandler(userUsecase usecase.SensorUsecase) SensorHandler {
 }
 
 func (h *sensorHandler) GetSensorData(c echo.Context) error {
-	req := repository.SensorRequest{}
+	req := dto.SensorRequest{}
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
 	}
@@ -62,7 +62,7 @@ func (h *sensorHandler) UpdateSensorData(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
 	}
 
-	body := repository.UpdateSensorBody{}
+	body := dto.UpdateSensorBody{}
 	if err := c.Bind(&body); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
 	}

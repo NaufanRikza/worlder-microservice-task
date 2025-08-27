@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"sensor-consumer/core/dto"
 	"sensor-consumer/core/entity"
 	"sensor-consumer/core/repository"
 )
@@ -11,9 +12,9 @@ type sensorUsecase struct {
 }
 
 type SensorUsecase interface {
-	GetSensorData(ctx context.Context, req repository.SensorRequest) (entity.SensorData, error)
+	GetSensorData(ctx context.Context, req dto.SensorRequest) (entity.SensorData, error)
 	DeleteSensorData(ctx context.Context, id uint64) error
-	UpdateSensorData(ctx context.Context, id uint64, body repository.UpdateSensorBody) error
+	UpdateSensorData(ctx context.Context, id uint64, body dto.UpdateSensorBody) error
 }
 
 func NewSensorUsecase(sensorRepo repository.SensorRepository) SensorUsecase {
@@ -22,7 +23,7 @@ func NewSensorUsecase(sensorRepo repository.SensorRepository) SensorUsecase {
 	}
 }
 
-func (s *sensorUsecase) GetSensorData(ctx context.Context, req repository.SensorRequest) (entity.SensorData, error) {
+func (s *sensorUsecase) GetSensorData(ctx context.Context, req dto.SensorRequest) (entity.SensorData, error) {
 	sensorData, err := s.sensorRepo.Get(ctx, req)
 	return sensorData, err
 }
@@ -31,7 +32,7 @@ func (s *sensorUsecase) DeleteSensorData(ctx context.Context, id uint64) error {
 	return s.sensorRepo.Delete(ctx, id)
 }
 
-func (s *sensorUsecase) UpdateSensorData(ctx context.Context, id uint64, body repository.UpdateSensorBody) error {
+func (s *sensorUsecase) UpdateSensorData(ctx context.Context, id uint64, body dto.UpdateSensorBody) error {
 	updatedData := entity.SensorData{
 		SensorValue: body.SensorValue,
 	}

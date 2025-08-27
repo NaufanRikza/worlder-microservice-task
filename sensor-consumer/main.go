@@ -8,6 +8,7 @@ import (
 	"sensor-consumer/cmd"
 	"sensor-consumer/config"
 	http_handler "sensor-consumer/core/handler/http"
+	"sensor-consumer/core/infrastructure/auth"
 	"sensor-consumer/core/repository"
 	"sensor-consumer/core/router"
 	"sensor-consumer/core/usecase"
@@ -40,14 +41,33 @@ func main() {
 
 	e := echo.New()
 
+	//repository
 	sensorRepository := repository.NewSensorRepository(db)
-	// userRepository := repository.NewUserRepository(db)
+	userRepository := repository.NewUserRepository(db)
 
+	jwtManager := auth.NewJWTManager("")
+	passwordHasher := auth.NewPasswordHasher()
+
+	//usecase
+	authUsecase := usecase.NewAuthUsecase(
+		jwtManager,
+		passwordHasher,
+	)
 	sensorUsecase := usecase.NewSensorUsecase(sensorRepository)
+	userUseCase := usecase.NewUserUsecase(userRepository)
 
+	//handler
+	authHandler := http_handler.NewAuthHandler(
+		authUsecase,
+		userUseCase,
+	)
 	sensorHandler := http_handler.NewSensorHandler(sensorUsecase)
 
+	//router
+	authRouter := router.NewAuthRouter(authHandler)
 	sensorRouter := router.NewSensorRouter(sensorHandler)
+
+	authRouter.RegisterRoutes(e)
 
 	groupV1 := e.Group("/api/v1")
 	sensorRouter.RegisterRoutes(groupV1)

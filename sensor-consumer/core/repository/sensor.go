@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"sensor-consumer/core/dto"
 	"sensor-consumer/core/entity"
 
 	"gorm.io/gorm"
@@ -13,7 +14,7 @@ type sensorRepository struct {
 }
 
 type SensorRepository interface {
-	Get(ctx context.Context, req SensorRequest) (entity.SensorData, error)
+	Get(ctx context.Context, req dto.SensorRequest) (entity.SensorData, error)
 	Delete(ctx context.Context, id uint64) error
 	Update(ctx context.Context, sensor entity.SensorData) error
 }
@@ -24,7 +25,7 @@ func NewSensorRepository(db *gorm.DB) SensorRepository {
 	}
 }
 
-func (r *sensorRepository) Get(ctx context.Context, req SensorRequest) (entity.SensorData, error) {
+func (r *sensorRepository) Get(ctx context.Context, req dto.SensorRequest) (entity.SensorData, error) {
 	var sensor entity.SensorData
 	db := r.DB.WithContext(ctx).Model(&sensor).Table(sensor.TableName())
 	db = db.Where("id1 = ?", req.ID1)
