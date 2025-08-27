@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"sensor-consumer/core/infrastructure/validator"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -14,6 +15,10 @@ func StartHTTPServer(ctx context.Context, e *echo.Echo) error {
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 		AllowCredentials: true,
 	}))
+
+	// Set up request validation
+	e.Validator = validator.NewValidator()
+
 	// Start server
 	go func() {
 		if err := e.Start(":8080"); err != nil {

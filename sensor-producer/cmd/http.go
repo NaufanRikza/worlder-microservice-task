@@ -14,6 +14,7 @@ func StartHTTPServer(ctx context.Context, e *echo.Echo) error {
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
 		AllowCredentials: true,
 	}))
+
 	// Start server
 	go func() {
 		if err := e.Start(":8080"); err != nil {
