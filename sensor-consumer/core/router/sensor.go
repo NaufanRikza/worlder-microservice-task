@@ -3,6 +3,7 @@ package router
 import (
 	"sensor-consumer/core/handler/http"
 
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,6 +22,11 @@ func NewSensorRouter(sensorHandler http.SensorHandler) SensorRouter {
 }
 
 func (r *sensorRouter) RegisterRoutes(g *echo.Group) {
+	g.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey:  []byte("your-secret-key"),
+		TokenLookup: "header:Authorization",
+	}))
+
 	g.GET("/sensor", r.sensorHandler.GetSensorData)
 	g.DELETE("/sensor/:id", r.sensorHandler.DeleteSensorData)
 	g.PATCH("/sensor/:id", r.sensorHandler.UpdateSensorData)

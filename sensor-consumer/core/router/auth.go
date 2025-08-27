@@ -2,7 +2,6 @@ package router
 
 import (
 	"sensor-consumer/core/handler/http"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -23,3 +22,5 @@ func NewAuthRouter(authHandler http.AuthHandler) AuthRouter {
 func (r *authRouter) RegisterRoutes(e *echo.Echo) {
 	e.POST("/login", r.authHandler.Login)
 }
+
+
