@@ -1,5 +1,5 @@
 package config
 
 type JWTConfig struct {
-	SecretKey string
+	SecretKey string `env:"JWT_SECRET"`
 }
