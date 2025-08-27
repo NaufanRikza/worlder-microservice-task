@@ -49,7 +49,7 @@ func main() {
 	router := router.NewRouter(sensorHandler)
 	group := e.Group("/api/v1")
 	router.RegisterRoutes(group)
-	
+
 	// Start HTTP server
 	cmd.StartHTTPServer(ctx, e)
 
