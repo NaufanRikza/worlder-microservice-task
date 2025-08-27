@@ -30,10 +30,14 @@ func (h *sensorHandler) GetSensorData(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
 	}
-	data, err := h.UserUsecase.GetSensorData(req)
+
+	ctx := c.Request().Context()
+
+	data, err := h.UserUsecase.GetSensorData(ctx, req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{"data": data, "message": "success"})
 }
 
@@ -42,9 +46,13 @@ func (h *sensorHandler) DeleteSensorData(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
 	}
-	if err := h.UserUsecase.DeleteSensorData(id); err != nil {
+
+	ctx := c.Request().Context()
+
+	if err := h.UserUsecase.DeleteSensorData(ctx, id); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
+
 	return c.JSON(http.StatusOK, map[string]string{"message": "success"})
 }
 
@@ -53,11 +61,15 @@ func (h *sensorHandler) UpdateSensorData(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
 	}
+
 	body := repository.UpdateSensorBody{}
 	if err := c.Bind(&body); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": err.Error()})
 	}
-	if err := h.UserUsecase.UpdateSensorData(id, body); err != nil {
+
+	ctx := c.Request().Context()
+
+	if err := h.UserUsecase.UpdateSensorData(ctx, id, body); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 	return c.JSON(http.StatusOK, map[string]string{"message": "success"})

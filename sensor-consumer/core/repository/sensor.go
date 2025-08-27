@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"sensor-consumer/core/entity"
 
@@ -12,9 +13,9 @@ type sensorRepository struct {
 }
 
 type SensorRepository interface {
-	Get(SensorRequest) (entity.SensorData, error)
-	Delete(id uint64) error
-	Update(sensor entity.SensorData) error
+	Get(ctx context.Context, req SensorRequest) (entity.SensorData, error)
+	Delete(ctx context.Context, id uint64) error
+	Update(ctx context.Context, sensor entity.SensorData) error
 }
 
 func NewSensorRepository(db *gorm.DB) SensorRepository {
@@ -23,9 +24,9 @@ func NewSensorRepository(db *gorm.DB) SensorRepository {
 	}
 }
 
-func (r *sensorRepository) Get(req SensorRequest) (entity.SensorData, error) {
+func (r *sensorRepository) Get(ctx context.Context, req SensorRequest) (entity.SensorData, error) {
 	var sensor entity.SensorData
-	db := r.DB.Model(&sensor).Table(sensor.TableName())
+	db := r.DB.WithContext(ctx).Model(&sensor).Table(sensor.TableName())
 	db = db.Where("id1 = ?", req.ID1)
 	db = db.Where("id2 = ?", req.ID2)
 	if req.TimeStart != nil && !req.TimeStart.IsZero() {
@@ -44,14 +45,14 @@ func (r *sensorRepository) Get(req SensorRequest) (entity.SensorData, error) {
 	return sensor, err
 }
 
-func (r *sensorRepository) Delete(id uint64) error {
-	return r.DB.Transaction(func(tx *gorm.DB) error {
+func (r *sensorRepository) Delete(ctx context.Context, id uint64) error {
+	return r.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		return tx.Model(&entity.SensorData{}).Table(entity.SensorData{}.TableName()).Delete(&entity.SensorData{}, id).Error
 	})
 }
 
-func (r *sensorRepository) Update(sensor entity.SensorData) error {
-	return r.DB.Transaction(func(tx *gorm.DB) error {
+func (r *sensorRepository) Update(ctx context.Context, sensor entity.SensorData) error {
+	return r.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		return tx.Model(&sensor).Table(sensor.TableName()).Updates(sensor).Error
 	})
 }
