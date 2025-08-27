@@ -27,13 +27,13 @@ func main() {
 		cancel()
 	}()
 
-	databaseConfig, err := config.GetDatabaseConfig()
+	config, err := config.NewConfig()
 	if err != nil {
-		fmt.Println("Error loading database config:", err)
+		fmt.Println("Error loading config:", err)
 		panic(err)
 	}
 
-	db, err := cmd.NewDatabaseInstance(databaseConfig)
+	db, err := cmd.NewDatabaseInstance(&config.DatabaseConfig)
 	if err != nil {
 		fmt.Println("Error creating database instance:", err)
 		panic(err)
@@ -70,7 +70,7 @@ func main() {
 	authRouter.RegisterRoutes(e)
 
 	groupV1 := e.Group("/api/v1")
-	sensorRouter.RegisterRoutes(groupV1)
+	sensorRouter.RegisterRoutes(groupV1, config.JWTConfig.SecretKey)
 
 	cmd.StartHTTPServer(ctx, e)
 

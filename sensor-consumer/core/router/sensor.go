@@ -12,7 +12,7 @@ type sensorRouter struct {
 }
 
 type SensorRouter interface {
-	RegisterRoutes(g *echo.Group)
+	RegisterRoutes(g *echo.Group, jwtSecretKey string)
 }
 
 func NewSensorRouter(sensorHandler http.SensorHandler) SensorRouter {
@@ -21,9 +21,9 @@ func NewSensorRouter(sensorHandler http.SensorHandler) SensorRouter {
 	}
 }
 
-func (r *sensorRouter) RegisterRoutes(g *echo.Group) {
+func (r *sensorRouter) RegisterRoutes(g *echo.Group, jwtSecretKey string) {
 	g.Use(echojwt.WithConfig(echojwt.Config{
-		SigningKey:  []byte("your-secret-key"),
+		SigningKey:  []byte(jwtSecretKey),
 		TokenLookup: "header:Authorization",
 	}))
 

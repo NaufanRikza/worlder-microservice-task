@@ -2,14 +2,13 @@ package config
 
 import "github.com/caarlos0/env/v11"
 
-type Config struct {
-	MqttConfig
-	AppConfig
+type AppConfig struct {
 	JWTConfig
+	DatabaseConfig
 }
 
-func NewConfig() (Config, error) {
-	config := Config{}
+func NewConfig() (AppConfig, error) {
+	config := AppConfig{}
 	err := env.Parse(&config)
 	return config, err
 }

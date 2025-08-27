@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-
-	"github.com/caarlos0/env/v11"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -14,12 +12,6 @@ type DatabaseConfig struct {
 	User     string `env:"DB_USER" envDefault:"root"`
 	Password string `env:"DB_PASSWORD" envDefault:"Tornado090699"`
 	Name     string `env:"DB_NAME" envDefault:"sensor_db"`
-}
-
-func GetDatabaseConfig() (*DatabaseConfig, error) {
-	cfg := DatabaseConfig{}
-	err := env.Parse(&cfg)
-	return &cfg, err
 }
 
 func (d DatabaseConfig) GetDialector() gorm.Dialector {
