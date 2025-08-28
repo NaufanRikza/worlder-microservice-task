@@ -48,7 +48,7 @@ func main() {
 	sensorHandler := http.NewSensorHandler(sensorUsecase)
 	router := router.NewRouter(sensorHandler)
 	group := e.Group("/api/v1")
-	router.RegisterRoutes(group)
+	router.RegisterRoutes(group, config.JWTConfig.SecretKey)
 
 	// Start HTTP server
 	cmd.StartHTTPServer(ctx, e)
