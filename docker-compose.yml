@@ -1,9 +1,9 @@
 services:
   sensor-consumer:
-    image: arm64v8/golang:1.24 # Use ARM-compatible image
     build:
       context: ./sensor-consumer
       dockerfile: Dockerfile
+    container_name: sensor-consumer
     ports:
       - "9080:8080" # expose port
     env_file:
@@ -19,10 +19,10 @@ services:
     #       memory: 512M
 
   sensor-producer:
-    image: arm64v8/golang:1.24 # Use ARM-compatible image
     build:
       context: ./sensor-producer
       dockerfile: Dockerfile
+    container_name: sensor-producer
     ports:
       - "8080:8080" # map to different host port
     env_file:
