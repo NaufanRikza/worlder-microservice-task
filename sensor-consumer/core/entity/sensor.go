@@ -1,6 +1,10 @@
 package entity
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type SensorData struct {
 	DefaultAttribute
@@ -12,4 +16,9 @@ type SensorData struct {
 
 func (SensorData) TableName() string {
 	return "sensor_data"
+}
+
+func (s *SensorData) BeforeCreate(tx *gorm.DB) (err error) {
+	s.Timestamp = s.Timestamp.UTC()
+	return
 }

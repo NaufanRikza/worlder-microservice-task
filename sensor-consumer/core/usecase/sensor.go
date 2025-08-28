@@ -21,8 +21,8 @@ type SensorUsecase interface {
 	HandleMessage(client mqtt.Client, msg mqtt.Message)
 	Subscribe() error
 	GetSensorData(ctx context.Context, req dto.SensorRequest) ([]entity.SensorData, error)
-	DeleteSensorData(ctx context.Context, id uint64) error
-	UpdateSensorData(ctx context.Context, id uint64, body dto.UpdateSensorBody) error
+	DeleteSensorData(ctx context.Context, req dto.DeleteSensorRequest) error
+	UpdateSensorData(ctx context.Context, req dto.UpdateSensorRequest, body dto.UpdateSensorBody) error
 }
 
 func NewSensorUsecase(sensorRepo repository.SensorRepository, consumer mqtt_consumer.Consumer) SensorUsecase {
@@ -37,16 +37,16 @@ func (s *sensorUsecase) GetSensorData(ctx context.Context, req dto.SensorRequest
 	return sensorData, err
 }
 
-func (s *sensorUsecase) DeleteSensorData(ctx context.Context, id uint64) error {
-	return s.sensorRepo.Delete(ctx, id)
+func (s *sensorUsecase) DeleteSensorData(ctx context.Context, req dto.DeleteSensorRequest) error {
+	return s.sensorRepo.Delete(ctx, req)
 }
 
-func (s *sensorUsecase) UpdateSensorData(ctx context.Context, id uint64, body dto.UpdateSensorBody) error {
+func (s *sensorUsecase) UpdateSensorData(ctx context.Context, req dto.UpdateSensorRequest, body dto.UpdateSensorBody) error {
 	updatedData := entity.SensorData{
 		SensorValue: body.SensorValue,
 	}
-	updatedData.ID = id
-	return s.sensorRepo.Update(ctx, updatedData)
+	updatedData.ID = req.ID
+	return s.sensorRepo.Update(ctx, req, updatedData)
 }
 
 func (s *sensorUsecase) HandleMessage(client mqtt.Client, msg mqtt.Message) {
@@ -64,5 +64,5 @@ func (s *sensorUsecase) HandleMessage(client mqtt.Client, msg mqtt.Message) {
 }
 
 func (s *sensorUsecase) Subscribe() error {
-	return 	s.consumer.Consume(s.HandleMessage)
+	return s.consumer.Consume(s.HandleMessage)
 }

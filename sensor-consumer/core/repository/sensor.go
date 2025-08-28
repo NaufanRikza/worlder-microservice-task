@@ -15,8 +15,8 @@ type sensorRepository struct {
 
 type SensorRepository interface {
 	Get(ctx context.Context, req dto.SensorRequest) ([]entity.SensorData, error)
-	Delete(ctx context.Context, id uint64) error
-	Update(ctx context.Context, sensor entity.SensorData) error
+	Delete(ctx context.Context, req dto.DeleteSensorRequest) error
+	Update(ctx context.Context, req dto.UpdateSensorRequest, sensor entity.SensorData) error
 	Create(ctx context.Context, sensor entity.SensorData) error
 }
 
@@ -28,15 +28,20 @@ func NewSensorRepository(db *gorm.DB) SensorRepository {
 
 func (r *sensorRepository) Get(ctx context.Context, req dto.SensorRequest) ([]entity.SensorData, error) {
 	var sensor []entity.SensorData
-	db := r.DB.WithContext(ctx).Model(&sensor).Table(entity.SensorData{}.TableName())
-	db = db.Where("id1 = ?", req.ID1)
-	db = db.Where("id2 = ?", req.ID2)
-	if req.TimeStart != nil && !req.TimeStart.IsZero() {
-		if req.TimeEnd != nil && !req.TimeEnd.IsZero() {
-			db.Where("timestamp BETWEEN ? AND ?", req.TimeStart, req.TimeEnd)
-		} else {
-			db.Where("timestamp >= ?", req.TimeStart)
-		}
+	db := r.DB.Debug().WithContext(ctx).Model(&sensor).Table(entity.SensorData{}.TableName())
+
+	if !req.TimeStart.IsZero() && (req.TimeEnd == nil || req.TimeEnd.IsZero()) {
+		db = db.Where("timestamp >= ?", req.TimeStart)
+	} else {
+		db = db.Where("timestamp BETWEEN ? AND ?", req.TimeStart, req.TimeEnd)
+	}
+
+	if req.ID1 != "" {
+		db = db.Where("id1 = ?", req.ID1)
+	}
+
+	if req.ID2 > 0 {
+		db = db.Where("id2 = ?", req.ID2)
 	}
 
 	offset := int((req.Page - 1) * req.Length)
@@ -47,15 +52,56 @@ func (r *sensorRepository) Get(ctx context.Context, req dto.SensorRequest) ([]en
 	return sensor, err
 }
 
-func (r *sensorRepository) Delete(ctx context.Context, id uint64) error {
+func (r *sensorRepository) Delete(ctx context.Context, req dto.DeleteSensorRequest) error {
 	return r.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		return tx.Model(&entity.SensorData{}).Table(entity.SensorData{}.TableName()).Delete(&entity.SensorData{}, id).Error
+		db := tx.Debug().Model(&entity.SensorData{}).
+			Table(entity.SensorData{}.TableName())
+
+		if req.ID != 0 {
+			db = db.Where("id = ?", req.ID)
+		}
+
+		if !req.TimeStart.IsZero() && (req.TimeEnd == nil || req.TimeEnd.IsZero()) {
+			db = db.Where("timestamp >= ?", req.TimeStart)
+		} else {
+			db = db.Where("timestamp BETWEEN ? AND ?", req.TimeStart, req.TimeEnd)
+		}
+
+		if req.ID1 != "" {
+			db = db.Where("id1 = ?", req.ID1)
+		}
+
+		if req.ID2 > 0 {
+			db = db.Where("id2 = ?", req.ID2)
+		}
+
+		return db.Delete(&entity.SensorData{}).Error
 	})
 }
 
-func (r *sensorRepository) Update(ctx context.Context, sensor entity.SensorData) error {
+func (r *sensorRepository) Update(ctx context.Context, req dto.UpdateSensorRequest, sensor entity.SensorData) error {
 	return r.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		return tx.Model(&sensor).Table(sensor.TableName()).Updates(sensor).Error
+		db := tx.Debug().Model(&sensor).Table(sensor.TableName())
+
+		if req.ID != 0 {
+			db = db.Where("id = ?", req.ID)
+		}
+
+		if !req.TimeStart.IsZero() && (req.TimeEnd == nil || req.TimeEnd.IsZero()) {
+			db = db.Where("timestamp >= ?", req.TimeStart)
+		} else {
+			db = db.Where("timestamp BETWEEN ? AND ?", req.TimeStart, req.TimeEnd)
+		}
+
+		if req.ID1 != "" {
+			db = db.Where("id1 = ?", req.ID1)
+		}
+
+		if req.ID2 > 0 {
+			db = db.Where("id2 = ?", req.ID2)
+		}
+
+		return db.Updates(&sensor).Error
 	})
 }
 

@@ -17,7 +17,7 @@ type DatabaseConfig struct {
 
 func (d DatabaseConfig) GetDialector() gorm.Dialector {
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+		"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=UTC",
 		d.User,
 		d.Password,
 		d.Host,
@@ -29,7 +29,7 @@ func (d DatabaseConfig) GetDialector() gorm.Dialector {
 
 func (d DatabaseConfig) GetDSN() string {
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+		"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=UTC",
 		d.User,
 		d.Password,
 		d.Host,

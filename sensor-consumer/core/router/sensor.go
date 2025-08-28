@@ -26,5 +26,7 @@ func (r *sensorRouter) RegisterRoutes(g *echo.Group, jwtSecretKey string) {
 
 	g.GET("/sensor", r.sensorHandler.GetSensorData)
 	g.DELETE("/sensor/:id", r.sensorHandler.DeleteSensorData)
+	g.DELETE("/sensor", r.sensorHandler.DeleteSensorData)
 	g.PATCH("/sensor/:id", r.sensorHandler.UpdateSensorData)
+	g.PATCH("/sensor", r.sensorHandler.UpdateSensorData)
 }
