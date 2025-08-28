@@ -2,24 +2,33 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
+	"log"
 	"sensor-consumer/core/dto"
 	"sensor-consumer/core/entity"
+	mqtt_consumer "sensor-consumer/core/infrastructure/consumer"
 	"sensor-consumer/core/repository"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 type sensorUsecase struct {
 	sensorRepo repository.SensorRepository
+	consumer   mqtt_consumer.Consumer
 }
 
 type SensorUsecase interface {
+	HandleMessage(client mqtt.Client, msg mqtt.Message)
+	Subscribe() error
 	GetSensorData(ctx context.Context, req dto.SensorRequest) (entity.SensorData, error)
 	DeleteSensorData(ctx context.Context, id uint64) error
 	UpdateSensorData(ctx context.Context, id uint64, body dto.UpdateSensorBody) error
 }
 
-func NewSensorUsecase(sensorRepo repository.SensorRepository) SensorUsecase {
+func NewSensorUsecase(sensorRepo repository.SensorRepository, consumer mqtt_consumer.Consumer) SensorUsecase {
 	return &sensorUsecase{
 		sensorRepo: sensorRepo,
+		consumer:   consumer,
 	}
 }
 
@@ -38,4 +47,22 @@ func (s *sensorUsecase) UpdateSensorData(ctx context.Context, id uint64, body dt
 	}
 	updatedData.ID = id
 	return s.sensorRepo.Update(ctx, updatedData)
+}
+
+func (s *sensorUsecase) HandleMessage(client mqtt.Client, msg mqtt.Message) {
+	var sensorData entity.SensorData
+	if err := json.Unmarshal(msg.Payload(), &sensorData); err != nil {
+		log.Printf("Error unmarshalling sensor data: %v", err)
+		return
+	}
+
+	ctx := context.Background()
+	err := s.sensorRepo.Create(ctx, sensorData)
+	if err != nil {
+		log.Printf("Error saving sensor data: %v", err)
+	}
+}
+
+func (s *sensorUsecase) Subscribe() error {
+	return 	s.consumer.Consume(s.HandleMessage)
 }

@@ -9,6 +9,7 @@ import (
 	"sensor-consumer/config"
 	http_handler "sensor-consumer/core/handler/http"
 	"sensor-consumer/core/infrastructure/auth"
+	mqtt_consumer "sensor-consumer/core/infrastructure/consumer"
 	"sensor-consumer/core/repository"
 	"sensor-consumer/core/router"
 	"sensor-consumer/core/usecase"
@@ -47,13 +48,18 @@ func main() {
 
 	jwtManager := auth.NewJWTManager("")
 	passwordHasher := auth.NewPasswordHasher()
+	mqttClient := cmd.StartMQTTClient(config.MqttConfig)
+	consumer := mqtt_consumer.NewConsumer(mqttClient, config.MqttConfig.Topic)
 
 	//usecase
 	authUsecase := usecase.NewAuthUsecase(
 		jwtManager,
 		passwordHasher,
 	)
-	sensorUsecase := usecase.NewSensorUsecase(sensorRepository)
+	sensorUsecase := usecase.NewSensorUsecase(
+		sensorRepository,
+		consumer,
+	)
 	userUseCase := usecase.NewUserUsecase(userRepository)
 
 	//handler
@@ -72,6 +78,7 @@ func main() {
 	groupV1 := e.Group("/api/v1")
 	sensorRouter.RegisterRoutes(groupV1, config.JWTConfig.SecretKey)
 
+	cmd.StartMQTTSubscriber(sensorUsecase)
 	cmd.StartHTTPServer(ctx, e)
 
 	<-ctx.Done()

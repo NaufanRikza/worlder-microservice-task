@@ -17,6 +17,7 @@ type SensorRepository interface {
 	Get(ctx context.Context, req dto.SensorRequest) (entity.SensorData, error)
 	Delete(ctx context.Context, id uint64) error
 	Update(ctx context.Context, sensor entity.SensorData) error
+	Create(ctx context.Context, sensor entity.SensorData) error
 }
 
 func NewSensorRepository(db *gorm.DB) SensorRepository {
@@ -55,5 +56,11 @@ func (r *sensorRepository) Delete(ctx context.Context, id uint64) error {
 func (r *sensorRepository) Update(ctx context.Context, sensor entity.SensorData) error {
 	return r.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		return tx.Model(&sensor).Table(sensor.TableName()).Updates(sensor).Error
+	})
+}
+
+func (r *sensorRepository) Create(ctx context.Context, sensor entity.SensorData) error {
+	return r.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		return tx.Model(&sensor).Table(sensor.TableName()).Create(&sensor).Error
 	})
 }
