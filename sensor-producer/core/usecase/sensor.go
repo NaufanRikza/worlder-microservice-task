@@ -41,6 +41,7 @@ func (s *sensorUsecase) Start(ctx context.Context) {
 		select {
 		case <-ticker.C:
 			// Generate sensor data
+			fmt.Println("Generating sensor data...")
 			min := 10.0
 			max := 100.0
 			sensorData := entity.SensorData{
@@ -60,10 +61,12 @@ func (s *sensorUsecase) Start(ctx context.Context) {
 
 		case freq := <-s.FreqChannel:
 			// Update the ticker frequency
+			fmt.Println("Changing frequency to:", freq, "ms")
 			ticker.Stop()
 			ticker = time.NewTicker(time.Duration(freq) * time.Millisecond)
 
 		case <-ctx.Done():
+			fmt.Println("Stopping sensor data generation...")
 			// Stop the MQTT client
 			s.Publisher.Disconnect()
 			return
