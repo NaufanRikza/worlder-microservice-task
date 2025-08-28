@@ -1,26 +1,28 @@
-# Build stage
 FROM arm64v8/golang:1.24-alpine AS builder
 WORKDIR /app
 
-# Set Go proxy for faster module downloads
+# Use Go proxy to speed up downloads
 ENV GOPROXY=https://proxy.golang.org,direct
 
-# Copy go.mod and go.sum first for caching
+# Copy go.mod and go.sum first to leverage Docker cache
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source code
+# Copy the rest of the source code
 COPY . .
 
-# Build the binary
-RUN CGO_ENABLED=0 GOOS=linux go build -o sensor-consumer main.go
+# Build binary for Linux, disable CGO for Alpine compatibility
+RUN CGO_ENABLED=0 GOOS=linux go build -x -o sensor-consumer main.go
 
+# ==========================
 # Run stage
+# ==========================
 FROM arm64v8/alpine:latest
 WORKDIR /app
 
-# Copy the binary from builder
+# Copy binary from builder
 COPY --from=builder /app/sensor-consumer ./
 
+# Expose port and run binary
 EXPOSE 8080
 CMD ["./sensor-consumer"]
