@@ -4,5 +4,6 @@ type AppConfig struct {
 	DataGenerationFrequency uint   `env:"DATA_GENERATION_FREQUENCY"`
 	ProducerHTTPPort        uint   `env:"PRODUCER_HTTP_PORT"`
 	SensorType              string `env:"SENSOR_TYPE"`
+	SensorTypeName          string `env:"SENSOR_TYPE_NAME"`
 	SensorID                int    `env:"SENSOR_ID"`
 }

@@ -20,7 +20,7 @@ type sensorUsecase struct {
 }
 
 type SensorUsecase interface {
-	Start(ctx context.Context, sensorType string, sensorID int)
+	Start(ctx context.Context, sensorType string, sensorTypeName string, sensorID int)
 	ChangeFrequency(freq uint) error
 }
 
@@ -33,7 +33,7 @@ func NewSensorUsecase(publisher infrastructure.Publisher, topic string, initialF
 	}
 }
 
-func (s *sensorUsecase) Start(ctx context.Context, sensorType string, sensorID int) {
+func (s *sensorUsecase) Start(ctx context.Context, sensorType string, sensorTypeName string, sensorID int) {
 	// Generate and publish sensor data in certain timing
 	ticker := time.NewTicker(time.Duration(s.InitialFreq) * time.Millisecond)
 	defer ticker.Stop()
@@ -50,6 +50,7 @@ func (s *sensorUsecase) Start(ctx context.Context, sensorType string, sensorID i
 
 			sensorData := entity.SensorData{
 				SensorValue: value,
+				SensorType:  sensorTypeName,
 				ID1:         sensorType,
 				ID2:         sensorID,
 				Timestamp:   time.Now().UTC().Format(time.RFC3339),
