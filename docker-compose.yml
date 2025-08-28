@@ -12,6 +12,8 @@ services:
       - SENSOR_TYPE=T
       - SENSOR_ID=1
       - SENSOR_TYPE_NAME=Temperature
+    networks:
+      - sensors-net
     # deploy:
     #   resources:
     #     limits:
@@ -27,8 +29,13 @@ services:
       - "8080:8080" # map to different host port
     env_file:
       - .env
+    networks:
+      - sensors-net
     # deploy:
     #   resources:
     #     limits:
     #       cpus: "0.5"
     #       memory: 256M
+  networks:
+    sensors-net:
+      driver: bridge
