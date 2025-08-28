@@ -1,4 +1,3 @@
-
 services:
   sensor-consumer:
     build:
@@ -11,6 +10,7 @@ services:
     environment:
       - SENSOR_TYPE=T
       - SENSOR_ID=1
+      - SENSOR_TYPE_NAME=Temperature
 
   sensor-producer:
     build:
