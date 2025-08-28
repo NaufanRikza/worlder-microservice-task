@@ -12,8 +12,15 @@ type jwtManager struct {
 }
 
 type JWTManager interface {
-	Generate(id uint64) (string, error)
+	Generate(id uint64, roles []string) (string, error)
 	Validate(token string) (uint, error)
+}
+
+type JWTClaim struct {
+	UserID uint64   `json:"user_id"`
+	Exp    int64    `json:"exp"`
+	Roles  []string `json:"role"`
+	jwt.RegisteredClaims
 }
 
 func NewJWTManager(secretKey string) JWTManager {
@@ -22,12 +29,17 @@ func NewJWTManager(secretKey string) JWTManager {
 	}
 }
 
-func (j *jwtManager) Generate(id uint64) (string, error) {
-	claims := jwt.MapClaims{
-		"id":  id,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+func (j *jwtManager) Generate(id uint64, roles []string) (string, error) {
+	claims := JWTClaim{
+		UserID: id,
+		Exp:    time.Now().Add(time.Hour * 24).Unix(),
+		Roles:  roles,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    "sensor-consumer",
+		},
 	}
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(j.secretKey))
 }

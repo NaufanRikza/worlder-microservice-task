@@ -11,16 +11,18 @@ import (
 type authHandler struct {
 	authUsecase usecase.AuthUsecase
 	userUsecase usecase.UserUsecase
+	userRoleUsecase usecase.UserRoleUsecase
 }
 
 type AuthHandler interface {
 	Login(c echo.Context) error
 }
 
-func NewAuthHandler(authUsecase usecase.AuthUsecase, userUsecase usecase.UserUsecase) AuthHandler {
+func NewAuthHandler(authUsecase usecase.AuthUsecase, userUsecase usecase.UserUsecase, userRoleUsecase usecase.UserRoleUsecase) AuthHandler {
 	return &authHandler{
-		authUsecase: authUsecase,
-		userUsecase: userUsecase,
+		authUsecase:     authUsecase,
+		userUsecase:     userUsecase,
+		userRoleUsecase: userRoleUsecase,
 	}
 }
 
@@ -37,7 +39,12 @@ func (h *authHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "username or password is incorrect"})
 	}
 
-	token, err := h.authUsecase.GenerateToken(user.ID)
+	roles, err := h.userRoleUsecase.GetRoleByUserID(user.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "could not retrieve user roles"})
+	}
+
+	token, err := h.authUsecase.GenerateToken(user.ID, roles)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "could not generate token"})
 	}

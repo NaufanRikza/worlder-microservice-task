@@ -2,10 +2,16 @@ package middleware
 
 import (
 	"net/http"
+	"sensor-consumer/core/infrastructure/auth"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+)
+
+const (
+	ClaimsKey = "claims"
 )
 
 func JWTMiddleware(secret string) echo.MiddlewareFunc {
@@ -24,9 +30,8 @@ func JWTMiddleware(secret string) echo.MiddlewareFunc {
 			}
 			tokenString := parts[1]
 
-			// Parse and validate token
-			token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-				// Make sure token uses HS256
+			claims := &auth.JWTClaim{}
+			token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, echo.NewHTTPError(http.StatusUnauthorized, "unexpected signing method")
 				}
@@ -37,12 +42,25 @@ func JWTMiddleware(secret string) echo.MiddlewareFunc {
 				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid or expired token"})
 			}
 
-			// Store claims in context
-			if claims, ok := token.Claims.(jwt.MapClaims); ok {
-				c.Set("user", claims)
+			if claims.Exp < time.Now().Unix() {
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "token expired"})
 			}
+
+			c.Set(ClaimsKey, claims)
+
 
 			return next(c)
 		}
 	}
+}
+
+func GetClaims(c echo.Context) *auth.JWTClaim {
+	v := c.Get(ClaimsKey)
+	if v == nil {
+		return nil
+	}
+	if mc, ok := v.(*auth.JWTClaim); ok {
+		return mc
+	}
+	return nil
 }

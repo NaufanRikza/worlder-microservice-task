@@ -36,8 +36,9 @@ func main() {
 	//repository
 	sensorRepository := repository.NewSensorRepository(db)
 	userRepository := repository.NewUserRepository(db)
+	userRoleRepository := repository.NewUserRoleRepository(db)
 
-	jwtManager := auth.NewJWTManager("")
+	jwtManager := auth.NewJWTManager(config.JWTConfig.SecretKey)
 	passwordHasher := auth.NewPasswordHasher()
 	mqttClient := cmd.StartMQTTClient(config.MqttConfig)
 	consumer := mqtt_consumer.NewConsumer(mqttClient, config.MqttConfig.Topic)
@@ -45,18 +46,19 @@ func main() {
 	//usecase
 	authUsecase := usecase.NewAuthUsecase(
 		jwtManager,
-		passwordHasher,
 	)
 	sensorUsecase := usecase.NewSensorUsecase(
 		sensorRepository,
 		consumer,
 	)
-	userUseCase := usecase.NewUserUsecase(userRepository)
+	userUseCase := usecase.NewUserUsecase(userRepository, passwordHasher)
+	userRoleUsecase := usecase.NewUserRoleUsecase(userRoleRepository)
 
 	//handler
 	authHandler := http_handler.NewAuthHandler(
 		authUsecase,
 		userUseCase,
+		userRoleUsecase,
 	)
 	sensorHandler := http_handler.NewSensorHandler(sensorUsecase)
 

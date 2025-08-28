@@ -24,5 +24,5 @@ func NewRouter(sensorHandler http.SensorHandler) Router {
 func (r *router) RegisterRoutes(e *echo.Group, jwtSecret string) {
 	e.Use(middleware.JWTMiddleware(jwtSecret))
 
-	e.POST("/sensor/:frequency", r.sensorHandler.ChangeFrequency)
+	e.POST("/sensor/:frequency", r.sensorHandler.ChangeFrequency, middleware.Authorize("admin"))
 }

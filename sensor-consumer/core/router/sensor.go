@@ -7,6 +7,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const (
+	roleAdmin = "admin"
+	roleUser  = "user"
+)
+
 type sensorRouter struct {
 	sensorHandler http.SensorHandler
 }
@@ -24,9 +29,9 @@ func NewSensorRouter(sensorHandler http.SensorHandler) SensorRouter {
 func (r *sensorRouter) RegisterRoutes(g *echo.Group, jwtSecretKey string) {
 	g.Use(middleware.JWTMiddleware(jwtSecretKey))
 
-	g.GET("/sensor", r.sensorHandler.GetSensorData)
-	g.DELETE("/sensor/:id", r.sensorHandler.DeleteSensorData)
-	g.DELETE("/sensor", r.sensorHandler.DeleteSensorData)
-	g.PATCH("/sensor/:id", r.sensorHandler.UpdateSensorData)
-	g.PATCH("/sensor", r.sensorHandler.UpdateSensorData)
+	g.GET("/sensor", r.sensorHandler.GetSensorData, middleware.Authorize(roleUser, roleAdmin))
+	g.DELETE("/sensor/:id", r.sensorHandler.DeleteSensorData, middleware.Authorize(roleAdmin))
+	g.DELETE("/sensor", r.sensorHandler.DeleteSensorData, middleware.Authorize(roleAdmin))
+	g.PATCH("/sensor/:id", r.sensorHandler.UpdateSensorData, middleware.Authorize(roleAdmin))
+	g.PATCH("/sensor", r.sensorHandler.UpdateSensorData, middleware.Authorize(roleAdmin))
 }
