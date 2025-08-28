@@ -2,8 +2,8 @@ package router
 
 import (
 	"sensor-producer/core/handler/http"
+	"sensor-producer/core/infrastructure/middleware"
 
-	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,10 +22,7 @@ func NewRouter(sensorHandler http.SensorHandler) Router {
 }
 
 func (r *router) RegisterRoutes(e *echo.Group, jwtSecret string) {
-	e.Use(echojwt.WithConfig(echojwt.Config{
-		SigningKey:  []byte(jwtSecret),
-		TokenLookup: "header:Authorization",
-	}))
+	e.Use(middleware.JWTMiddleware(jwtSecret))
 
 	e.POST("/sensor/:frequency", r.sensorHandler.ChangeFrequency)
 }
