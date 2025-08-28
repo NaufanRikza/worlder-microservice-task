@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: sensor-consumer
     ports:
-      - "9080:9080" # expose port
+      - "9080:8080" # expose port
     env_file:
       - .env
     environment:
