@@ -38,4 +38,4 @@ services:
     #       memory: 256M
 networks:
   sensors-net:
-    driver: bridge
+    external: true
