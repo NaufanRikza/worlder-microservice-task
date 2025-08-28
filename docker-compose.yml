@@ -36,6 +36,6 @@ services:
     #     limits:
     #       cpus: "0.5"
     #       memory: 256M
-  networks:
-    sensors-net:
-      driver: bridge
+networks:
+  sensors-net:
+    driver: bridge
