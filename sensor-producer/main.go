@@ -22,15 +22,8 @@ func main() {
 		panic("Error loading config:")
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	sigs := make(chan os.Signal, 1)
 	freqChannel := make(chan uint, 1)
-	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigs
-		fmt.Println("Shutting down...")
-		cancel()
-	}()
+	ctx, cancel := context.WithCancel(context.Background())
 
 	//start mqtt client
 	mqttClient := cmd.StartMQTTClient(config.MqttConfig)
@@ -50,8 +43,15 @@ func main() {
 	group := e.Group("/api/v1")
 	router.RegisterRoutes(group, config.JWTConfig.SecretKey)
 
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigs
+		fmt.Println("Shutting down...")
+		cancel()
+	}()
 	// Start HTTP server
-	cmd.StartHTTPServer(ctx, e)
+	cmd.StartHTTPServer(ctx, e, config.AppConfig.ProducerHTTPPort)
 
 	<-ctx.Done()
 	fmt.Println("Cleanup complete.")

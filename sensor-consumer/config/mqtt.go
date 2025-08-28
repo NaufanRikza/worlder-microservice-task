@@ -7,7 +7,7 @@ type MqttConfig struct {
 	Port     string `env:"MQTT_PORT" envDefault:"1883"`
 	User     string `env:"MQTT_USER"`
 	Pass     string `env:"MQTT_PASS"`
-	ClientID string `env:"MQTT_CLIENT_ID"`
+	ClientID string `env:"MQTT_CONSUMER_CLIENT_ID"`
 	Topic    string `env:"MQTT_TOPIC"`
 }
 

@@ -19,15 +19,6 @@ import (
 )
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigs
-		fmt.Println("Shutting down...")
-		cancel()
-	}()
-
 	config, err := config.NewConfig()
 	if err != nil {
 		fmt.Println("Error loading config:", err)
@@ -78,8 +69,20 @@ func main() {
 	groupV1 := e.Group("/api/v1")
 	sensorRouter.RegisterRoutes(groupV1, config.JWTConfig.SecretKey)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigs
+		fmt.Println("Shutting down...")
+		consumer.Close()
+		cancel()
+	}()
+
+	// Start MQTT subscriber
 	cmd.StartMQTTSubscriber(sensorUsecase)
-	cmd.StartHTTPServer(ctx, e)
+	// Start HTTP server
+	cmd.StartHTTPServer(ctx, e, config.AppConfig.ConsumerHTTPPort)
 
 	<-ctx.Done()
 	fmt.Println("Cleanup complete.")

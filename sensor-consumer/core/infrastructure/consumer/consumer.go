@@ -1,6 +1,8 @@
 package consumer
 
-import mqtt "github.com/eclipse/paho.mqtt.golang"
+import (
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+)
 
 type consumer struct {
 	mqttClient mqtt.Client
@@ -9,6 +11,7 @@ type consumer struct {
 
 type Consumer interface {
 	Consume(handler func(client mqtt.Client, msg mqtt.Message)) error
+	Close()
 }
 
 func NewConsumer(mqttClient mqtt.Client, topic string) Consumer {
@@ -22,4 +25,9 @@ func (c *consumer) Consume(handler func(client mqtt.Client, msg mqtt.Message)) e
 	token := c.mqttClient.Subscribe(c.topic, 0, handler)
 	token.Wait()
 	return token.Error()
+}
+
+func (c *consumer) Close() {
+	c.mqttClient.Unsubscribe(c.topic)
+	c.mqttClient.Disconnect(250)
 }

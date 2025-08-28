@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"sensor-consumer/core/infrastructure/validator"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func StartHTTPServer(ctx context.Context, e *echo.Echo) error {
+func StartHTTPServer(ctx context.Context, e *echo.Echo, port uint) error {
 	e.Use(middleware.Logger())
 	e.Debug = true
 	e.Use(middleware.Recover())
@@ -24,7 +25,7 @@ func StartHTTPServer(ctx context.Context, e *echo.Echo) error {
 
 	// Start server
 	go func() {
-		if err := e.Start(":8080"); err != nil {
+		if err := e.Start(fmt.Sprintf(":%d", port)); err != nil {
 			panic("Failed to start HTTP server: " + err.Error())
 		}
 	}()

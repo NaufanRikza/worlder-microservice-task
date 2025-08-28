@@ -7,19 +7,20 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type AppConfig struct {
+type Config struct {
 	JWTConfig
 	DatabaseConfig
 	MqttConfig
+	AppConfig
 }
 
-func NewConfig() (AppConfig, error) {
+func NewConfig() (Config, error) {
 	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	config := AppConfig{}
+	config := Config{}
 	err = env.Parse(&config)
 	return config, err
 }
