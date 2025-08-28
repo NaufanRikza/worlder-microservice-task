@@ -35,7 +35,7 @@ func main() {
 		freqChannel,
 	)
 
-	go sensorUsecase.Start(ctx)
+	go sensorUsecase.Start(ctx, config.AppConfig.SensorType, config.AppConfig.SensorID)
 
 	e := echo.New()
 	sensorHandler := http.NewSensorHandler(sensorUsecase)

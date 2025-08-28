@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"math/rand/v2"
 	"sensor-producer/core/entity"
 	"sensor-producer/core/infrastructure"
@@ -19,7 +20,7 @@ type sensorUsecase struct {
 }
 
 type SensorUsecase interface {
-	Start(ctx context.Context)
+	Start(ctx context.Context, sensorType string, sensorID int)
 	ChangeFrequency(freq uint) error
 }
 
@@ -32,7 +33,7 @@ func NewSensorUsecase(publisher infrastructure.Publisher, topic string, initialF
 	}
 }
 
-func (s *sensorUsecase) Start(ctx context.Context) {
+func (s *sensorUsecase) Start(ctx context.Context, sensorType string, sensorID int) {
 	// Generate and publish sensor data in certain timing
 	ticker := time.NewTicker(time.Duration(s.InitialFreq) * time.Millisecond)
 	defer ticker.Stop()
@@ -44,10 +45,13 @@ func (s *sensorUsecase) Start(ctx context.Context) {
 			fmt.Println("Generating sensor data...")
 			min := 10.0
 			max := 100.0
+			value := rand.Float64()*(max-min) + min
+			value = math.Round(value*100) / 100
+
 			sensorData := entity.SensorData{
-				SensorValue: rand.Float64()*(max-min) + min, // Random value between min and max
-				ID1:         "T",
-				ID2:         0,
+				SensorValue: value,
+				ID1:         sensorType,
+				ID2:         sensorID,
 				Timestamp:   time.Now().UTC().Format(time.RFC3339),
 			}
 
