@@ -1,5 +1,6 @@
 services:
   sensor-consumer:
+    image: arm64v8/golang:1.24 # Use ARM-compatible image
     build:
       context: ./sensor-consumer
       dockerfile: Dockerfile
@@ -11,8 +12,14 @@ services:
       - SENSOR_TYPE=T
       - SENSOR_ID=1
       - SENSOR_TYPE_NAME=Temperature
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
 
   sensor-producer:
+    image: arm64v8/golang:1.24 # Use ARM-compatible image
     build:
       context: ./sensor-producer
       dockerfile: Dockerfile
@@ -20,3 +27,8 @@ services:
       - "8080:8080" # map to different host port
     env_file:
       - .env
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
