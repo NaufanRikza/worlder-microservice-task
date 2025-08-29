@@ -35,7 +35,10 @@ func NewSensorUsecase(publisher infrastructure.Publisher, topic string, initialF
 
 func (s *sensorUsecase) Start(ctx context.Context, sensorType string, sensorTypeName string, sensorID int) {
 	// Generate and publish sensor data in certain timing
+	fmt.Println("Starting sensor data generation...", sensorTypeName, sensorID)
+	fmt.Println("Publishing to topic every: ", s.InitialFreq, "ms")
 	ticker := time.NewTicker(time.Duration(s.InitialFreq) * time.Millisecond)
+
 	defer ticker.Stop()
 
 	for {
