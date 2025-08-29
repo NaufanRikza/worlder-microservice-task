@@ -73,5 +73,5 @@ services:
     networks:
       - sensors-net
   networks:
-  sensors-net:
-    external: true
+    sensors-net:
+      external: true
