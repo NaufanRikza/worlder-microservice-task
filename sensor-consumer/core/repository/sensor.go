@@ -30,12 +30,14 @@ func (r *sensorRepository) Get(ctx context.Context, req dto.SensorRequest) ([]dt
 	var sensor []dto.SensorDataResult
 	db := r.DB.Debug().
 		WithContext(ctx).
-		Select("sensor_value, id1, id2, timestamp").
+		Select("sensor_value, sensor_type, id1, id2, timestamp").
 		Model(&sensor).
 		Table(entity.SensorData{}.TableName())
 
-	if (req.TimeEnd == nil && !req.TimeStart.IsZero()) && (req.TimeEnd == nil || req.TimeEnd.IsZero()) {
-		db = db.Where("timestamp >= ?", req.TimeStart)
+	if req.TimeEnd == nil || req.TimeEnd.IsZero() {
+		if !req.TimeStart.IsZero() {
+			db = db.Where("timestamp >= ?", req.TimeStart)
+		}
 	} else {
 		db = db.Where("timestamp BETWEEN ? AND ?", req.TimeStart, req.TimeEnd)
 	}
