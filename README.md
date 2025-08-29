@@ -108,8 +108,8 @@ For a visual representation of the architecture and database schema, please refe
     *   **Request Body**:
         ```json
         {
-            "email": "user@example.com",
-            "password": "password123"
+            "username": "your_username",
+            "password": "your_password"
         }
         ```
 
