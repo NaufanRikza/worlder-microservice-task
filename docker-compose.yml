@@ -26,9 +26,9 @@ services:
     env_file:
       - .env
     environment: 
-      -SENSOR_TYPE=T
-      -SENSOR_ID=1
-      -SENSOR_TYPE_NAME=Temperature
+      - SENSOR_TYPE=T
+      - SENSOR_ID=1
+      - SENSOR_TYPE_NAME=Temperature
     networks:
       - sensors-net
     # deploy:
