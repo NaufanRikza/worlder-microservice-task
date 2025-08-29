@@ -62,6 +62,7 @@ func (s *sensorUsecase) Start(ctx context.Context, sensorType string, sensorType
 				log.Fatal(err)
 			}
 
+			fmt.Println("payload:", string(payload))
 			s.Publisher.Publish(s.Topic, payload)
 
 		case freq := <-s.FreqChannel:
@@ -84,6 +85,8 @@ func (s *sensorUsecase) ChangeFrequency(freq uint) error {
 	case s.FreqChannel <- freq:
 		return nil
 	default:
-		return fmt.Errorf("failed to change frequency")
+		<-s.FreqChannel       // remove old value
+		s.FreqChannel <- freq // send new value
+		return nil
 	}
 }
