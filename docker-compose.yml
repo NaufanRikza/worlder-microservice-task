@@ -20,7 +20,7 @@ services:
       - "8080:8080" # map to different host port
     env_file:
       - .env
-    environment: 
+    environment:
       - SENSOR_TYPE=T
       - SENSOR_ID=1
       - SENSOR_TYPE_NAME=Temperature
@@ -37,7 +37,7 @@ services:
       - "8081:8080" # map to different host port
     env_file:
       - .env
-    environment: 
+    environment:
       - SENSOR_TYPE=H
       - SENSOR_ID=1
       - SENSOR_TYPE_NAME=Humidity
@@ -54,12 +54,13 @@ services:
       - "8082:8080" # map to different host port
     env_file:
       - .env
-    environment: 
+    environment:
       - SENSOR_TYPE=T
       - SENSOR_ID=2
       - SENSOR_TYPE_NAME=Temperature
       - MQTT_PRODUCER_CLIENT_ID=sensor-producer-temperature
     networks:
       - sensors-net
+networks:
   sensors-net:
     external: true
