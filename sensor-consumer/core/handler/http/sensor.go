@@ -36,6 +36,10 @@ func (h *sensorHandler) GetSensorData(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": "bad request"})
 	}
 
+	if (req.TimeEnd != nil && !req.TimeEnd.IsZero()) && (req.TimeStart == nil || req.TimeStart.IsZero()) {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "bad request"})
+	}
+
 	ctx := c.Request().Context()
 
 	data, err := h.UserUsecase.GetSensorData(ctx, req)
@@ -61,7 +65,7 @@ func (h *sensorHandler) DeleteSensorData(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": "bad request"})
 	}
 
-	if !req.TimeEnd.IsZero() && (req.TimeStart == nil || req.TimeStart.IsZero()) {
+	if (req.TimeEnd != nil && !req.TimeEnd.IsZero()) && (req.TimeStart == nil || req.TimeStart.IsZero()) {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": "bad request"})
 	}
 
@@ -104,7 +108,7 @@ func (h *sensorHandler) UpdateSensorData(c echo.Context) error {
 		req.TimeEnd = &timeEnd
 	}
 
-	if !req.TimeEnd.IsZero() && (req.TimeStart == nil || req.TimeStart.IsZero()) {
+	if (req.TimeEnd != nil && !req.TimeEnd.IsZero()) && (req.TimeStart == nil || req.TimeStart.IsZero()) {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": "bad request"})
 	}
 
