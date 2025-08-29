@@ -4,10 +4,17 @@ This project is a microservice-based system for producing and consuming sensor d
 
 ## System Architecture
 
-The system is composed of two main Go microservices:
+The system is composed of several microservices orchestrated by Docker Compose:
 
-*   **`sensor-producer`**: A service that simulates a sensor. It periodically generates data and publishes it to an MQTT topic. It also exposes an HTTP endpoint to dynamically change the frequency of data generation.
-*   **`sensor-consumer`**: This service subscribes to the MQTT topic to receive sensor data. It then stores this data in a MySQL database and provides a RESTful API for clients to authenticate, retrieve, and manage the sensor data.
+*   **Sensor Producers**: Three instances of the `sensor-producer` service are configured, each simulating a different sensor:
+    *   `sensor-producer-temperature-1`: Simulates a temperature sensor.
+    *   `sensor-producer-humidity`: Simulates a humidity sensor.
+    *   `sensor-producer-temperature-2`: Simulates a second temperature sensor.
+    Each producer generates data and publishes it to an MQTT topic. They also expose an HTTP endpoint to dynamically change their data generation frequency.
+
+*   **`sensor-consumer`**: This service subscribes to the MQTT topic to receive data from all producers. It then stores this data in a MySQL database and provides a RESTful API for clients to authenticate and manage the sensor data.
+
+*   **`nginx`**: A reverse proxy that sits in front of the `sensor-consumer`. All API requests to the consumer service are routed through Nginx.
 
 For a visual representation of the architecture and database schema, please refer to the `System Diagram.jpg` and `ERD.jpg` files in the repository.
 
@@ -70,6 +77,7 @@ For a visual representation of the architecture and database schema, please refe
     MQTT_TOPIC=sensors/data
     MQTT_USERNAME=
     MQTT_PASSWORD=
+    MQTT_PRODUCER_CLIENT_ID=sensor-producer
 
     # Security
     JWT_SECRET=your-jwt-secret-key
@@ -83,22 +91,85 @@ For a visual representation of the architecture and database schema, please refe
     ```
 
 4.  **Access the services:**
-    *   **Sensor Producer API**: `http://localhost:8080`
-    *   **Sensor Consumer API**: `http://localhost:9080`
+    *   **Sensor Consumer API (via Nginx)**: `http://localhost:9081`
+    *   **Sensor Producer APIs**:
+        *   Temperature 1: `http://localhost:8080`
+        *   Humidity: `http://localhost:8081`
+        *   Temperature 2: `http://localhost:8082`
+
+## Database Migration and Seeding
+
+This project does not perform automatic database migrations or seeding upon startup. You must perform these steps manually.
+
+### Migration
+
+The database schema is defined by several GORM entities within the `sensor-consumer` service:
+*   `SensorData`
+*   `User`
+*   `Role`
+*   `UserRole`
+
+To create the necessary tables, you can use GORM's `AutoMigrate` feature. You would typically do this by creating a temporary Go program or a CLI command that initializes a database connection and runs the migration.
+
+Example of a migration script:
+```go
+package main
+
+import (
+    "fmt"
+    "sensor-consumer/config"
+    "sensor-consumer/core/entity"
+    "gorm.io/driver/mysql"
+    "gorm.io/gorm"
+)
+
+func main() {
+    // Assume you have a config loader
+    // For simplicity, we'll manually define the DSN here
+    dsn := "user:password@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+    db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+    if err != nil {
+        panic("failed to connect database")
+    }
+
+    fmt.Println("Running Migrations...")
+    db.AutoMigrate(&entity.SensorData{}, &entity.User{}, &entity.Role{}, &entity.UserRole{})
+    fmt.Println("Migrations complete.")
+}
+```
+
+### Seeding
+
+After running the migrations, the database will be empty. You will need to manually add data, especially for `roles` and `users`, to be able to log in and use the API.
+
+1.  **Create Roles**: You should add at least an `admin` and a `user` role to the `roles` table.
+2.  **Create a User**: Create a new user in the `users` table. Remember to hash the password using a secure algorithm like bcrypt.
+3.  **Assign Role to User**: Create an entry in the `user_roles` table to link the new user to a role.
+
+## Postman Collection
+
+You can find a Postman collection for this API here:
+
+[https://www.postman.com/science-specialist-44124245/workspace/my-workspace/collection/31096617-69522de2-c912-4a04-8273-61a8acc8de02](https://www.postman.com/science-specialist-44124245/workspace/my-workspace/collection/31096617-69522de2-c912-4a04-8273-61a8acc8de02?action=share&creator=31096617&active-environment=31096617-fe682184-ad36-419e-81be-f36a5a7f5f53)
 
 ## API Endpoints
 
-### Sensor Producer (`http://localhost:8080`)
+### Sensor Producer
+
+The following endpoint is available on each of the three producer instances:
+*   `http://localhost:8080` (Temperature 1)
+*   `http://localhost:8081` (Humidity)
+*   `http://localhost:8082` (Temperature 2)
 
 *   **Change Sensor Frequency**
     *   **Endpoint**: `POST /sensor/:frequency`
-    *   **Description**: Changes the frequency (in seconds) at which the sensor publishes data.
+    *   **Description**: Changes the frequency (in seconds) at which the specific sensor instance publishes data.
     *   **Authorization**: `Admin` role required.
     *   **Path Parameters**:
-        *   `frequency` (integer, **required**): The interval in seconds for publishing sensor data.
-    *   **Example**: `POST /sensor/5`
+        *   `frequency` (integer, **required**): The interval in milliseconds for publishing sensor data.
+    *   **Example**: `POST http://localhost:8080/sensor/5`
 
-### Sensor Consumer (`http://localhost:9080`)
+### Sensor Consumer (`http://localhost:9081`)
 
 #### Authentication
 
