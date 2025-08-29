@@ -8,10 +8,6 @@ services:
       - "9080:8080" # expose port
     env_file:
       - .env
-    environment:
-      - SENSOR_TYPE:T
-      - SENSOR_ID:1
-      - SENSOR_TYPE_NAME:Temperature
     networks:
       - sensors-net
     # deploy:
@@ -29,6 +25,10 @@ services:
       - "8080:8080" # map to different host port
     env_file:
       - .env
+    environment:
+      - SENSOR_TYPE:T
+      - SENSOR_ID:1
+      - SENSOR_TYPE_NAME:Temperature
     networks:
       - sensors-net
     # deploy:
