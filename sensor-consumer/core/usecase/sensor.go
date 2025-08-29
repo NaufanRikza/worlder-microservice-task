@@ -20,7 +20,7 @@ type sensorUsecase struct {
 type SensorUsecase interface {
 	HandleMessage(client mqtt.Client, msg mqtt.Message)
 	Subscribe() error
-	GetSensorData(ctx context.Context, req dto.SensorRequest) ([]entity.SensorData, error)
+	GetSensorData(ctx context.Context, req dto.SensorRequest) ([]dto.SensorDataResult, error)
 	DeleteSensorData(ctx context.Context, req dto.DeleteSensorRequest) error
 	UpdateSensorData(ctx context.Context, req dto.UpdateSensorRequest, body dto.UpdateSensorBody) error
 }
@@ -32,7 +32,7 @@ func NewSensorUsecase(sensorRepo repository.SensorRepository, consumer mqtt_cons
 	}
 }
 
-func (s *sensorUsecase) GetSensorData(ctx context.Context, req dto.SensorRequest) ([]entity.SensorData, error) {
+func (s *sensorUsecase) GetSensorData(ctx context.Context, req dto.SensorRequest) ([]dto.SensorDataResult, error) {
 	sensorData, err := s.sensorRepo.Get(ctx, req)
 	return sensorData, err
 }
