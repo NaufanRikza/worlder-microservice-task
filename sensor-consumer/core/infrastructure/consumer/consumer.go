@@ -22,7 +22,7 @@ func NewConsumer(mqttClient mqtt.Client, topic string) Consumer {
 }
 
 func (c *consumer) Consume(handler func(client mqtt.Client, msg mqtt.Message)) error {
-	token := c.mqttClient.Subscribe(c.topic, 0, handler)
+	token := c.mqttClient.Subscribe(c.topic, 1, handler)
 	token.Wait()
 	return token.Error()
 }

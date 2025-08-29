@@ -28,9 +28,10 @@ func main() {
 	//start mqtt client
 	mqttClient := cmd.StartMQTTClient(config.MqttConfig)
 	publisher := infrastructure.NewPublisher(mqttClient)
+	topic := fmt.Sprintf("sensor/%s/%d", config.AppConfig.SensorTypeName, config.AppConfig.SensorID)
 	sensorUsecase := usecase.NewSensorUsecase(
 		publisher,
-		config.MqttConfig.Topic,
+		topic,
 		config.AppConfig.DataGenerationFrequency,
 		freqChannel,
 	)

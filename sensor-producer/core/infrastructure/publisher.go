@@ -18,7 +18,7 @@ func NewPublisher(mqttClient mqtt.Client) Publisher {
 }
 
 func (p *publisher) Publish(topic string, payload []byte) error {
-	token := p.mqttClient.Publish(topic, 0, false, payload)
+	token := p.mqttClient.Publish(topic, 1, false, payload)
 	token.Wait()
 	return token.Error()
 }
