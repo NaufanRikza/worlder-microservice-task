@@ -3,7 +3,6 @@ services:
     build:
       context: ./sensor-consumer
       dockerfile: Dockerfile
-    container_name: sensor-consumer
     ports:
       - "9080:8080" # expose port
     env_file:
