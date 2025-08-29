@@ -34,12 +34,12 @@ func (r *sensorRepository) Get(ctx context.Context, req dto.SensorRequest) ([]dt
 		Model(&sensor).
 		Table(entity.SensorData{}.TableName())
 
-	if req.TimeEnd == nil || req.TimeEnd.IsZero() {
-		if !req.TimeStart.IsZero() {
+	if req.TimeStart != nil && !req.TimeStart.IsZero() {
+		if req.TimeEnd != nil && !req.TimeEnd.IsZero() {
+			db = db.Where("timestamp BETWEEN ? AND ?", req.TimeStart, req.TimeEnd)
+		} else {
 			db = db.Where("timestamp >= ?", req.TimeStart)
 		}
-	} else {
-		db = db.Where("timestamp BETWEEN ? AND ?", req.TimeStart, req.TimeEnd)
 	}
 
 	if req.ID1 != "" {
@@ -67,10 +67,12 @@ func (r *sensorRepository) Delete(ctx context.Context, req dto.DeleteSensorReque
 			db = db.Where("id = ?", req.ID)
 		}
 
-		if !req.TimeStart.IsZero() && (req.TimeEnd == nil || req.TimeEnd.IsZero()) {
-			db = db.Where("timestamp >= ?", req.TimeStart)
-		} else {
-			db = db.Where("timestamp BETWEEN ? AND ?", req.TimeStart, req.TimeEnd)
+		if req.TimeStart != nil && !req.TimeStart.IsZero() {
+			if req.TimeEnd != nil && !req.TimeEnd.IsZero() {
+				db = db.Where("timestamp BETWEEN ? AND ?", req.TimeStart, req.TimeEnd)
+			} else {
+				db = db.Where("timestamp >= ?", req.TimeStart)
+			}
 		}
 
 		if req.ID1 != "" {
@@ -93,12 +95,13 @@ func (r *sensorRepository) Update(ctx context.Context, req dto.UpdateSensorReque
 			db = db.Where("id = ?", req.ID)
 		}
 
-		if !req.TimeStart.IsZero() && (req.TimeEnd == nil || req.TimeEnd.IsZero()) {
-			db = db.Where("timestamp >= ?", req.TimeStart)
-		} else {
-			db = db.Where("timestamp BETWEEN ? AND ?", req.TimeStart, req.TimeEnd)
+		if req.TimeStart != nil && !req.TimeStart.IsZero() {
+			if req.TimeEnd != nil && !req.TimeEnd.IsZero() {
+				db = db.Where("timestamp BETWEEN ? AND ?", req.TimeStart, req.TimeEnd)
+			} else {
+				db = db.Where("timestamp >= ?", req.TimeStart)
+			}
 		}
-
 		if req.ID1 != "" {
 			db = db.Where("id1 = ?", req.ID1)
 		}
